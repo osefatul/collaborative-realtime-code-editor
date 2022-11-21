@@ -14,7 +14,9 @@ import {
 
 
 
+
 const EditorPage = () => {
+
 
     // We use useRef hook to persist values between renders
     const socketRef = useRef(null);
@@ -26,16 +28,34 @@ const EditorPage = () => {
     const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
 
+    console.log(roomId, location.state.username)
+
 
 
     useEffect(() => {
 
         const init = async ()=> {
             socketRef.current = await initSocket()
-            socketRef.current.emit()
+            // console.log(socketRef)
+
+            // Error handling
+            socketRef.current.on('connect_error', (err) => handleErrors(err));
+            socketRef.current.on('connect_failed', (err) => handleErrors(err));
+            function handleErrors(e) {
+                console.log('socket error', e);
+                toast.error('Socket connection failed, try again later.');
+                reactNavigator('/');
+            }
+
+            // Send roomId and user to server
+            socketRef.current.emit("JOIN", {
+                roomId,
+                username: location.state?.username,
+            });
         }
 
         init()
+
     }, []);
 
 

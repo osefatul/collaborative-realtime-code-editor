@@ -4,7 +4,7 @@ const app = express();
 const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
-const ACTIONS = require('./Actions');
+const ACTIONS = require("./Actions")
 
 const server = http.createServer(app);
 const io = new Server(server);
@@ -34,12 +34,16 @@ io.on('connection', (socket) => {
 
 
     // receive a message from the client - When joined
-    socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
-        console.log(username)
+    socket.on("JOIN", ({ roomId, username }) => {
+
+        // store new user socket id and username...
         userSocketMap[socket.id] = username;
         socket.join(roomId);
 
+        // get all clients that already are in the room.
         const clients = getAllConnectedClients(roomId);
+        console.log(clients)
+
         clients.forEach(({ socketId }) => {
             io.to(socketId).emit(ACTIONS.JOINED, {
                 clients,
@@ -48,7 +52,7 @@ io.on('connection', (socket) => {
             });
         });
     });
-    
+
 
     // receive a message from the client when code changed
     socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {

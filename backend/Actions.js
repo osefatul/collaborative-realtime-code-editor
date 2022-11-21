@@ -7,6 +7,6 @@ const ACTIONS = {
     LEAVE: 'leave',
 };
 
-module.exports ={
+module.exports = {
     ACTIONS
 }
