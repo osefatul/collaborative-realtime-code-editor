@@ -56,6 +56,7 @@ io.on('connection', (socket) => {
 
     // receive a message from the client when code changed
     socket.on("CODE_CHANGE", ({ roomId, code }) => {
+        console.log(roomId, code);
         socket.in(roomId).emit("CODE_CHANGE", { code });
     });
 
