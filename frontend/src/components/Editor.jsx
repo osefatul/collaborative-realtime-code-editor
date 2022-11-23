@@ -23,20 +23,27 @@ import { Controlled as ControlledEditorComponent } from 'react-codemirror2';
 
 const Editor = ({ language, value, setEditorState, socketRef, roomId, onCodeChange  }) => {
 
+
+const editorRef = useRef(null);
 const [theme, setTheme] = useState("dracula")
+const [code, setCode] = useState("");
 
-const handleChange = (editor, data, value) => {
-setEditorState(value);
-console.log(value)
 
-const code = value
-onCodeChange(value)
+const handleChange = (editor, data, value, event) => {
 
-socketRef.current.emit("CODE_CHANGE", {
-    roomId,
-    code,
-});
+    setEditorState(value);
+    setCode(value)
+    onCodeChange(value);
 
+    async function init() {
+        if(value)
+        await socketRef.current.emit("CODE_CHANGE", {
+            roomId,
+            code,
+        });
+    }
+
+    init();
 }
 
 const themeArray = ['dracula', 'monokai', 'mdn-like', 'the-matrix', 'night']
@@ -44,61 +51,37 @@ const themeArray = ['dracula', 'monokai', 'mdn-like', 'the-matrix', 'night']
 
 
 
-const onChange  = (editor, data, value) => {
-
-// onCodeChange(value)
-
-// socketRef.current.emit("CODE_CHANGE", {
-//     roomId,
-//     value,
-// });
-
-}
 
 
-
-    const editorRef = useRef(null);
 
     useEffect(() => {
 
         async function init() {
-            
-            // editorRef.current = CodeMirror.fromTextArea(
-            //     document.getElementById('realtimeEditor'),
-            //     {
-            //         mode: { name: 'javascript', json: true },
-            //         theme: 'dracula',
-            //         autoCloseTags: true,
-            //         autoCloseBrackets: true,
-            //         lineNumbers: true,
-            //     }
-            // );
+            console.log(code)
+            onCodeChange(editorRef.current.props.value);
+            setCode(editorRef.current.props.value)
 
-            editorRef.current.on('change', (instance, changes) => {
-                const { origin } = changes;
-                const code = instance.getValue();
-                onCodeChange(code);
-
-                if (origin !== 'setValue') {
-                    socketRef.current.emit("CODE_CHANGE", {
-                        roomId,
-                        code,
-                    });
-                }
+            if(editorRef.current.props.value)
+            socketRef.current.emit("CODE_CHANGE", {
+                roomId,
+                code,
             });
         }
 
         init();
 
-    }, []);
+    }, [code]);
 
 
 
     useEffect(() => {
+
         if (socketRef.current) {
-            socketRef.current.on("CODE_CHANGE", ({ code }) => {
-                if (code !== null) {
-                    editorRef.current.setValue(code);
+            socketRef.current.on("CODE_CHANGE", ({ serverCode }) => {
+                console.log(serverCode)
+                if (code !== undefined)  {
+                    setCode(serverCode);
+                    setEditorState(serverCode)
                 }
             });
         }
@@ -107,6 +90,9 @@ const onChange  = (editor, data, value) => {
             socketRef.current.off("CODE_CHANGE");
         };
     }, [socketRef.current]);
+
+    
+
 
 
 
@@ -128,8 +114,8 @@ return (
 
     <ControlledEditorComponent
         onBeforeChange={handleChange}
-
-        value= {value}
+        ref={editorRef}
+        value= {code}
         className="code-mirror-wrapper"
         options={{
             lineWrapping: true,
@@ -140,7 +126,7 @@ return (
             autoCloseTags: true,
             autoCloseBrackets: true, 
         }}
-        onChange={onChange}
+        // onChange={onChange}
     />
 </div>
 )

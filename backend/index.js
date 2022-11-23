@@ -56,13 +56,15 @@ io.on('connection', (socket) => {
 
     // receive a message from the client when code changed
     socket.on("CODE_CHANGE", ({ roomId, code }) => {
-        console.log(roomId, code);
-        socket.in(roomId).emit("CODE_CHANGE", { code });
+        console.log("roomId:" + roomId, code);
+
+        socket.in(roomId).emit("CODE_CHANGE", { serverCode:code});
     });
 
 
     // receive a message from the client code synced.
     socket.on("SYNC_CODE", ({ socketId, code }) => {
+        console.log("sync code:" + code);
         io.to(socketId).emit("CODE_CHANGE", { code });
     });
 
