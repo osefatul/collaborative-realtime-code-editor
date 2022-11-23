@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
         console.log(clients)
 
         clients.forEach(({ socketId }) => {
-            io.to(socketId).emit(ACTIONS.JOINED, {
+            io.to(socketId).emit("JOINED", {
                 clients,
                 username,
                 socketId: socket.id,
@@ -55,22 +55,22 @@ io.on('connection', (socket) => {
 
 
     // receive a message from the client when code changed
-    socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
-        socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
+    socket.on("CODE_CHANGE", ({ roomId, code }) => {
+        socket.in(roomId).emit("CODE_CHANGE", { code });
     });
 
 
     // receive a message from the client code synced.
-    socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
-        io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+    socket.on("SYNC_CODE", ({ socketId, code }) => {
+        io.to(socketId).emit("CODE_CHANGE", { code });
     });
 
 
     // receive a message from the client when leave.
-    socket.on('disconnect', () => {
+    socket.on('disconnecting', () => {
         const rooms = [...socket.rooms];
         rooms.forEach((roomId) => {
-            socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
+            socket.in(roomId).emit("DISCONNECTED", {
                 socketId: socket.id,
                 username: userSocketMap[socket.id],
             });

@@ -40,10 +40,11 @@ const Home = () => {
         <div className="homePageWrapper">
 
             <header className='codeLogo'>
-                < BsCode style={{fontSize:"50px"}} />
-                    <p className=''>Best Collaborative Real-Time Editor</p>
+                {/* < BsCode style={{fontSize:"50px"}} /> */}
+                <img src="/code-sync.png"  alt="" />
+                    <p className='bigWindow'>Best Collaborative Real-Time Editor</p>
 
-                < BsCodeSlash style={{fontSize:"50px"}} />
+                {/* < BsCodeSlash style={{fontSize:"50px"}} /> */}
 
             </header>
 
@@ -69,8 +70,11 @@ const Home = () => {
                     <button className="btn joinBtn" onClick={joinRoom}>
                         Join
                     </button>
-                    <span className="createInfo">
+                    <p className="createInfo">
+                        <span>
                         Don't have an invite? &nbsp;
+                        </span>
+                        
                         <a
                             onClick={createNewRoom}
                             href="#"
@@ -78,7 +82,7 @@ const Home = () => {
                         >
                             create new room
                         </a>
-                    </span>
+                    </p>
                 </div>
             </div>
 

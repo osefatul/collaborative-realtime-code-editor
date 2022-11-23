@@ -17,7 +17,6 @@ import {
 
 const EditorPage = () => {
 
-
     // We use useRef hook to persist values between renders
     const socketRef = useRef(null);
     const codeRef = useRef(null);
@@ -47,16 +46,74 @@ const EditorPage = () => {
                 reactNavigator('/');
             }
 
+
             // Send roomId and user to server
             socketRef.current.emit("JOIN", {
                 roomId,
                 username: location.state?.username,
             });
+
+
+
+            // Listening for joined event
+            socketRef.current.on(
+                "JOINED",
+                ({ clients, username, socketId }) => {
+                    if (username !== location.state?.username) {
+                        toast.success(`${username} joined the room.`);
+                        console.log(`${username} joined`);
+                    }
+                    setClients(clients);
+                    
+                    socketRef.current.emit("SYNC_CODE", {
+                        code: codeRef.current,
+                        socketId,
+                    });
+                }
+            );
+
+
+
+            
+            // Listening for disconnected
+            socketRef.current.on(
+                "DISCONNECTED",
+                ({ socketId, username }) => {
+                    toast.success(`${username} left the room.`);
+                    setClients((prev) => {
+                        return prev.filter(
+                            (client) => client.socketId !== socketId
+                        );
+                    });
+                }
+            );
         }
 
         init()
 
+        return () => {
+            socketRef.current.disconnect();
+            socketRef.current.off("JOINED");
+            socketRef.current.off("DISCONNECTED");
+        };
+
     }, []);
+
+
+    async function copyRoomId() {
+        try {
+            await navigator.clipboard.writeText(roomId);
+            toast.success('Room ID has been copied to your clipboard');
+        } catch (err) {
+            toast.error('Could not copy the Room ID');
+            console.error(err);
+        }
+    }
+
+
+    function leaveRoom() {
+        reactNavigator('/');
+    }
 
 
     if (!location.state) {
@@ -75,7 +132,7 @@ const EditorPage = () => {
                             alt="logo"
                         />
                     </div>
-                    <h3>Connected</h3>
+                    <h3 style = {{padding:"20px 0"}}>Online</h3>
                     <div className="clientsList">
                         {clients.map((client) => (
                             <Client
@@ -86,12 +143,12 @@ const EditorPage = () => {
                     </div>
                 </div>
                 <button className="btn copyBtn" 
-                // onClick={copyRoomId}
+                onClick={copyRoomId}
                 >
                     Copy ROOM ID
                 </button>
                 <button className="btn leaveBtn" 
-                // onClick={leaveRoom}
+                onClick={leaveRoom}
                 >
                     Leave
                 </button>
