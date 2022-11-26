@@ -2,11 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
 import 'codemirror/theme/material.css';
-
 import 'codemirror/theme/mdn-like.css';
 import 'codemirror/theme/the-matrix.css';
 import 'codemirror/theme/night.css';
-
 import 'codemirror/mode/xml/xml';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/css/css';
@@ -23,73 +21,177 @@ import { Controlled as ControlledEditorComponent } from 'react-codemirror2';
 
 const Editor = ({ language, value, setEditorState, socketRef, roomId, onCodeChange  }) => {
 
+    const [theme, setTheme] = useState("dracula")
+    const themeArray = ['dracula', 'monokai', 'mdn-like', 'the-matrix', 'night']
+    
+    const editorRef = useRef(null);
 
-const editorRef = useRef(null);
-const [theme, setTheme] = useState("dracula")
-const [code, setCode] = useState("");
+    // const [code, setCode] = useState("");
 
 
-const handleChange = (editor, data, value, event) => {
 
-    setEditorState(value);
-    setCode(value)
-    onCodeChange(value);
+    const handleChange = (editor, data, value,) => {
 
-    async function init() {
-        if(value)
-        await socketRef.current.emit("CODE_CHANGE", {
-            roomId,
-            code,
-        });
+
+        async function init() {
+
+            onCodeChange(value);
+            setEditorState(value);
+            // await setCode(value)
+
+            if(language === "xml"){
+                console.log("this is xml:", language)
+            await socketRef.current.emit("XML_CODE_CHANGE", {
+                roomId,
+                code:value
+            });
+            }
+
+            else if(language === "css"){
+                console.log("this is css:", language)
+                await socketRef.current.emit("CSS_CODE_CHANGE", {
+                    roomId,
+                    code:value
+                });
+            }
+
+            else {
+                console.log("this js:", language)
+                await socketRef.current.emit("JS_CODE_CHANGE", {
+                    
+                    roomId,
+                    code:value
+                });
+            }
+        }
+
+        init();
     }
 
-    init();
-}
-
-const themeArray = ['dracula', 'monokai', 'mdn-like', 'the-matrix', 'night']
 
 
 
 
-
+    useEffect(()=>{
+        // onCodeChange(code);
+        console.log(value)
+    },[])
 
 
     useEffect(() => {
-
         async function init() {
-            console.log(code)
-            onCodeChange(editorRef.current.props.value);
-            setCode(editorRef.current.props.value)
+            // console.log(value)
+            onCodeChange(value);
+            setEditorState(value);
 
-            if(editorRef.current.props.value)
-            socketRef.current.emit("CODE_CHANGE", {
-                roomId,
-                code,
+
+            // if(value) {
+            //     socketRef.current.emit("CODE_CHANGE", {
+            //         roomId,
+            //         value,
+            //     });
+            // }
+
+            if( value && language === "xml"){
+                console.log("this is xml:", language)
+                await socketRef.current.emit("XML_CODE_CHANGE", {
+                    roomId,
+                    code:value
             });
+            }
+
+
+            else if(value && language === "css"){
+                console.log("this is css:", language)
+                await socketRef.current.emit("CSS_CODE_CHANGE", {
+                    roomId,
+                    code:value
+                });
+            }
+
+            else {
+                console.log("this is js:", language)
+                await socketRef.current.emit("JS_CODE_CHANGE", {
+                    roomId,
+                    code:value
+                });
+            }
         }
 
         init();
 
-    }, [code]);
+    }, [value, language, onCodeChange, setEditorState]);
+
+
 
 
 
     useEffect(() => {
 
-        if (socketRef.current) {
-            socketRef.current.on("CODE_CHANGE", ({ serverCode }) => {
-                console.log(serverCode)
-                if (code !== undefined)  {
-                    setCode(serverCode);
-                    setEditorState(serverCode)
+        // if (socketRef.current) {
+        //     socketRef.current.on("CODE_CHANGE", ({ serverCode }) => {
+        //         console.log(serverCode)
+
+        //         if (serverCode !== undefined)  {
+        //             onCodeChange(serverCode);
+        //             setEditorState(serverCode)
+        //         }
+        //     });
+        // }
+
+        if( socketRef.current && language === "xml"){
+            socketRef.current.on("XML_CODE_CHANGE", ({ xml }) => {
+                console.log(xml)
+
+                if (xml)  {
+                    // setCode(serverCode);
+                    onCodeChange(xml);
+                    setEditorState(xml)
                 }
             });
         }
 
+
+        else if( socketRef.current && language === "css"){
+            socketRef.current.on("CSS_CODE_CHANGE", ({ css }) => {
+                console.log(css)
+
+                if (css)  {
+                    onCodeChange(css);
+                    setEditorState(css)
+                }
+            });
+        }
+
+        else if( socketRef.current && language === "javascript"){
+            socketRef.current.on("JS_CODE_CHANGE", 
+            ({ js }) => {
+                console.log(js)
+
+                if (js)  {
+
+                    onCodeChange(js);
+                    setEditorState(js)
+                }
+            });
+        }
+
+
+
         return () => {
-            socketRef.current.off("CODE_CHANGE");
+            if(language === "xml"){
+                socketRef.current.off("XML_CODE_CHANGE");
+            }
+            else if(language === "css"){
+                socketRef.current.off("CSS_CODE_CHANGE");
+
+            }
+            else{
+                socketRef.current.off("JS_CODE_CHANGE");
+            }
         };
-    }, [socketRef.current]);
+
+    }, [socketRef.current, language, setEditorState]);
 
     
 
@@ -112,10 +214,11 @@ return (
         </select>
     </div>
 
+
     <ControlledEditorComponent
         onBeforeChange={handleChange}
         ref={editorRef}
-        value= {code}
+        value= {value}
         className="code-mirror-wrapper"
         options={{
             lineWrapping: true,
@@ -128,6 +231,8 @@ return (
         }}
         // onChange={onChange}
     />
+
+
 </div>
 )
 }

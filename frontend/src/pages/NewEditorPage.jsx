@@ -42,19 +42,26 @@ const NewEditorPage = () => {
                 </html>
             `
             )
-        }, 250);
+        }, 1000);
 
         return () => clearTimeout(timeOut)
     }, [html, css, js])
 
     // We use useRef hook to persist values between renders
     const socketRef = useRef(null);
+
+
     const codeRef = useRef(null);
 
+    const htmlCodeRef = useRef(null);
+    const cssCodeRef = useRef(null);
+    const JsCodeRef = useRef(null);
+
+
     const location = useLocation();
+    const reactNavigator = useNavigate();
     
     const { roomId } = useParams();
-    const reactNavigator = useNavigate();
     const [clients, setClients] = useState([]);
 
     // console.log(roomId, location.state.username)
@@ -93,10 +100,21 @@ const NewEditorPage = () => {
                         toast.success(`${username} joined the room.`);
                         console.log(`${username} joined`);
                     }
+
                     setClients(clients);
                     
-                    socketRef.current.emit("SYNC_CODE", {
-                        code: codeRef.current,
+                    socketRef.current.emit("XML_SYNC_CODE", {
+                        code: htmlCodeRef.current,
+                        socketId,
+                    });
+
+                    socketRef.current.emit("CSS_SYNC_CODE", {
+                        code: cssCodeRef.current,
+                        socketId,
+                    });
+
+                    socketRef.current.emit("JS_SYNC_CODE", {
+                        code: JsCodeRef.current,
                         socketId,
                     });
                 }
@@ -126,7 +144,6 @@ const NewEditorPage = () => {
             socketRef.current.off("JOINED");
             socketRef.current.off("DISCONNECTED");
         };
-
     }, []);
 
 
@@ -226,7 +243,7 @@ const NewEditorPage = () => {
                                     socketRef={socketRef}
                                     roomId={roomId}
                                     onCodeChange={(code) => {
-                                        codeRef.current = code;
+                                        htmlCodeRef.current = code;
                                     }}/>
                                 ): openedEditor === "css" ? (
                                     <Editor
@@ -237,7 +254,7 @@ const NewEditorPage = () => {
                                     socketRef={socketRef}
                                     roomId={roomId}
                                     onCodeChange={(code) => {
-                                        codeRef.current = code;
+                                        cssCodeRef.current = code;
                                     }}/>
                                     ) : (
                                     <Editor
@@ -248,7 +265,7 @@ const NewEditorPage = () => {
                                     socketRef={socketRef}
                                     roomId={roomId}
                                     onCodeChange={(code) => {
-                                        codeRef.current = code;
+                                        JsCodeRef.current = code;
                                     }}/>
                             )}
                             

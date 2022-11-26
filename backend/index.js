@@ -55,18 +55,57 @@ io.on('connection', (socket) => {
 
 
     // receive a message from the client when code changed
-    socket.on("CODE_CHANGE", ({ roomId, code }) => {
-        console.log("roomId:" + roomId, code);
+    // socket.on("CODE_CHANGE", ({ roomId, code }) => {
+    //     console.log("roomId:" + roomId, code);
+    //     socket.in(roomId).emit("CODE_CHANGE", { serverCode:code});
+    // });
 
-        socket.in(roomId).emit("CODE_CHANGE", { serverCode:code});
+    socket.on("XML_CODE_CHANGE", ({ roomId, code }) => {
+        console.log("xml roomId:" + roomId, code);
+
+        socket.in(roomId).emit("XML_CODE_CHANGE", { xml:code});
     });
+
+    socket.on("CSS_CODE_CHANGE", ({ roomId, code }) => {
+        console.log("css roomId:" + roomId, code);
+
+        socket.in(roomId).emit("CSS_CODE_CHANGE", { css:code});
+    });
+
+    socket.on("JS_CODE_CHANGE", ({ roomId, code }) => {
+        console.log("js roomId:" + roomId, code);
+
+        socket.in(roomId).emit("JS_CODE_CHANGE", { js:code});
+    });
+
+
+
 
 
     // receive a message from the client code synced.
-    socket.on("SYNC_CODE", ({ socketId, code }) => {
-        console.log("sync code:" + code);
-        io.to(socketId).emit("CODE_CHANGE", { code });
+
+    // socket.on("SYNC_CODE", ({ socketId, code }) => {
+    //     console.log("sync code:" + code);
+    //     io.to(socketId).emit("CODE_CHANGE", { code });
+    // });
+
+    socket.on("XML_SYNC_CODE", ({ socketId, code }) => {
+        console.log("xml sync code:" + code);
+        io.to(socketId).emit("XML_CODE_CHANGE", { code });
     });
+
+    socket.on("CSS_SYNC_CODE", ({ socketId, code }) => {
+        console.log("css sync code:" + code);
+        io.to(socketId).emit("CSS_CODE_CHANGE", { code });
+    });
+
+    socket.on("JS_SYNC_CODE", ({ socketId, code }) => {
+        console.log("js sync code:" + code);
+        io.to(socketId).emit("JS_CODE_CHANGE", { code });
+    });
+
+
+
 
 
     // receive a message from the client when leave.
