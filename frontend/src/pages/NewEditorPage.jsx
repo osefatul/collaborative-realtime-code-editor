@@ -45,13 +45,12 @@ const NewEditorPage = () => {
         }, 1000);
 
         return () => clearTimeout(timeOut)
+
     }, [html, css, js])
 
     // We use useRef hook to persist values between renders
     const socketRef = useRef(null);
 
-
-    const codeRef = useRef(null);
 
     const htmlCodeRef = useRef(null);
     const cssCodeRef = useRef(null);
@@ -63,8 +62,6 @@ const NewEditorPage = () => {
     
     const { roomId } = useParams();
     const [clients, setClients] = useState([]);
-
-    // console.log(roomId, location.state.username)
 
 
 

@@ -20,24 +20,18 @@ import { Controlled as ControlledEditorComponent } from 'react-codemirror2';
 
 
 const Editor = ({ language, value, setEditorState, socketRef, roomId, onCodeChange  }) => {
+    
 
+    const editorRef = useRef(null);
     const [theme, setTheme] = useState("dracula")
     const themeArray = ['dracula', 'monokai', 'mdn-like', 'the-matrix', 'night']
-    
-    const editorRef = useRef(null);
-
-    // const [code, setCode] = useState("");
-
 
 
     const handleChange = (editor, data, value,) => {
 
-
         async function init() {
-
             onCodeChange(value);
             setEditorState(value);
-            // await setCode(value)
 
             if(language === "xml"){
                 console.log("this is xml:", language)
@@ -85,13 +79,6 @@ const Editor = ({ language, value, setEditorState, socketRef, roomId, onCodeChan
             setEditorState(value);
 
 
-            // if(value) {
-            //     socketRef.current.emit("CODE_CHANGE", {
-            //         roomId,
-            //         value,
-            //     });
-            // }
-
             if( value && language === "xml"){
                 console.log("this is xml:", language)
                 await socketRef.current.emit("XML_CODE_CHANGE", {
@@ -128,16 +115,6 @@ const Editor = ({ language, value, setEditorState, socketRef, roomId, onCodeChan
 
     useEffect(() => {
 
-        // if (socketRef.current) {
-        //     socketRef.current.on("CODE_CHANGE", ({ serverCode }) => {
-        //         console.log(serverCode)
-
-        //         if (serverCode !== undefined)  {
-        //             onCodeChange(serverCode);
-        //             setEditorState(serverCode)
-        //         }
-        //     });
-        // }
 
         if( socketRef.current && language === "xml"){
             socketRef.current.on("XML_CODE_CHANGE", ({ xml }) => {
